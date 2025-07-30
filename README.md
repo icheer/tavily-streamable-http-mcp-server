@@ -47,7 +47,7 @@ Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规�
    - 命名您的 Worker（如：`tavily-mcp-server`）
 
 3. **部署代码**
-   - 将 `worker.js` 中的代码复制到在线编辑器
+   - 将本仓库的 `worker.js` 中的代码复制到在线编辑器
    - 点击 `Save and Deploy`
 
 4. **配置环境变量**
