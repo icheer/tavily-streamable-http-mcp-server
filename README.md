@@ -10,7 +10,7 @@
 
 </div>
 
-## � 简介
+## 📖 简介
 
 Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规范的网络搜索服务器，基于 Cloudflare Workers 平台构建。它提供了高性能的网络搜索和内容提取功能，支持与 LobeChat、Cherry Studio、Claude Desktop 等 AI 客户端无缝集成。
 
