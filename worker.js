@@ -308,11 +308,26 @@ async function handleToolCall(params, env) {
   }
 }
 
+// 如果环境变量中的TAVILY_API_KEY设置了多个(逗号分隔),则每次随机使用一个
+function getRandomApiKey(env) {
+  const keys = (env.TAVILY_API_KEY || '')
+    .split(',')
+    .map(key => key.trim())
+    .filter(key => key);
+  // 如果没有设置TAVILY_API_KEY或第一个key为空,则抛出错误
+
+  if (keys.length === 0 || !keys[0]) {
+    throw new Error('TAVILY_API_KEY 环境变量未设置或无效');
+  }
+  // 随机选择一个API密钥
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
 // 处理Tavily搜索
 async function handleTavilySearch(args, env) {
   try {
     const searchParams = {
-      api_key: env.TAVILY_API_KEY,
+      api_key: getRandomApiKey(env),
       query: args.query,
       max_results: args.max_results || 5,
       search_depth: args.search_depth || 'basic',
@@ -390,7 +405,7 @@ async function handleTavilySearch(args, env) {
 async function handleTavilyExtract(args, env) {
   try {
     const extractParams = {
-      api_key: env.TAVILY_API_KEY,
+      api_key: getRandomApiKey(env),
       urls: args.urls
     };
 

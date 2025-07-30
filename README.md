@@ -1,156 +1,296 @@
-# Tavily MCP Server - Cloudflare Workers部署指南
+# Tavily Streamable HTTP MCP Server
 
-## 🚀 快速部署
+<div align="center">
 
-### 方式一：使用Cloudflare Dashboard（推荐，最简单）
+一个基于 Cloudflare Workers 的 Tavily 搜索 MCP (Model Context Protocol) 服务器
 
-1. **登录 Cloudflare Dashboard**
-   - 访问 [dash.cloudflare.com](https://dash.cloudflare.com)
-   - 选择 "Workers & Pages"
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)](https://workers.cloudflare.com/)
+[![MCP Protocol](https://img.shields.io/badge/MCP-Compatible-blue)](https://github.com/modelcontextprotocol)
 
-2. **创建新的Worker**
-   - 点击 "Create application"
-   - 选择 "Create Worker"
-   - 给Worker起个名字，比如 `tavily-mcp-server`
+</div>
 
-3. **复制粘贴代码**
-   - 将上面的 JavaScript 代码完整复制
-   - 粘贴到Worker编辑器中，替换默认代码
-   - 点击 "Save and Deploy"
+## � 简介
 
-4. **设置环境变量**
-   - 在Worker详情页，点击 "Settings" → "Variables"
-   - 添加环境变量：
-     - 变量名：`TAVILY_API_KEY`
-     - 值：你的Tavily API密钥
-     - 选择 "Encrypt"（加密）
-   - 点击 "Save and Deploy"
+Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规范的网络搜索服务器，基于 Cloudflare Workers 平台构建。它提供了高性能的网络搜索和内容提取功能，支持与 LobeChat、Cherry Studio、Claude Desktop 等 AI 客户端无缝集成。
 
-5. **获取Worker URL**
-   - 部署成功后，你会得到一个URL，类似：
-   - `https://tavily-mcp-server.your-subdomain.workers.dev`
+### ✨ 核心特性
 
-### 方式二：使用Wrangler CLI
+- 🔍 **智能搜索**：基于 Tavily API 的高质量网络搜索
+- 📄 **内容提取**：从指定 URL 提取和处理网页内容
+- ⚡ **边缘计算**：利用 Cloudflare 全球网络实现低延迟响应
+- 🔐 **安全可靠**：支持 API 密钥轮换和负载均衡
+- 💰 **完全免费**：基于 Cloudflare Workers 免费计划
+- 🌐 **跨平台兼容**：支持多种 MCP 客户端
 
-1. **安装Wrangler CLI**
+### 🛠 技术栈
+
+- **运行时**：Cloudflare Workers
+- **协议**：Model Context Protocol (MCP)
+- **API**：Tavily Search API
+- **传输**：Streamable HTTP
+
+## 🚀 快速开始
+
+### 方式一：Cloudflare Dashboard 部署（推荐）
+
+1. **准备工作**
    ```bash
-   npm install -g wrangler
+   # 获取 Tavily API 密钥
+   # 访问 https://tavily.com 注册并获取 API Key
    ```
 
-2. **登录Cloudflare**
+2. **创建 Worker**
+   - 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
+   - 导航至 `Workers & Pages`
+   - 点击 `Create application` → `Create Worker`
+   - 命名您的 Worker（如：`tavily-mcp-server`）
+
+3. **部署代码**
+   - 将 `worker.js` 中的代码复制到在线编辑器
+   - 点击 `Save and Deploy`
+
+4. **配置环境变量**
+   - 在 Worker 设置页面选择 `Settings` → `Variables`
+   - 添加环境变量：
+     - **名称**：`TAVILY_API_KEY`
+     - **值**：您的 Tavily API 密钥（支持多个密钥用逗号分隔）
+     - **类型**：加密变量
+   - 保存并重新部署
+
+### 方式二：Wrangler CLI 部署
+
+1. **环境准备**
    ```bash
+   # 安装 Wrangler CLI
+   npm install -g wrangler
+   
+   # 登录 Cloudflare
    wrangler login
    ```
 
-3. **创建项目目录**
+2. **项目初始化**
    ```bash
-   mkdir tavily-mcp-workers
-   cd tavily-mcp-workers
-   ```
-
-4. **创建文件**
-   - 创建 `src/worker.js` 并复制Worker代码
-   - 创建 `wrangler.toml` 并复制配置文件
-
-5. **设置环境变量**
-   ```bash
+   # 克隆仓库
+   git clone <repository-url>
+   cd tavily-mcp-server
+   
+   # 配置环境变量
    wrangler secret put TAVILY_API_KEY
-   # 然后输入你的API密钥
    ```
 
-6. **部署**
+3. **部署服务**
    ```bash
    wrangler deploy
    ```
 
-## 🔧 配置LobeChat
+## 📋 API 文档
 
-部署成功后，在LobeChat中添加MCP服务器：
+### 端点说明
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/` | GET | 服务信息页面 |
+| `/health` | GET | 健康检查端点 |
+| `/mcp` | POST | MCP 协议通信端点 |
+
+### 支持的工具
+
+#### 1. tavily_search
+执行网络搜索操作
+
+**参数：**
+```json
+{
+  "query": "搜索查询内容",          // 必需
+  "max_results": 5,              // 可选，默认 5
+  "search_depth": "basic",       // 可选，basic/advanced
+  "include_domains": ["域名"],    // 可选
+  "exclude_domains": ["域名"]     // 可选
+}
+```
+
+#### 2. tavily_extract
+从指定 URL 提取内容
+
+**参数：**
+```json
+{
+  "urls": ["https://example.com"] // 必需，URL 数组
+}
+```
+
+## 🔧 客户端配置
+
+### LobeChat 配置
+
+在 LobeChat 中添加 MCP 服务器：
 
 ```json
 {
   "name": "tavily-search",
   "transport": "streamable-http",
-  "url": "https://你的worker域名.workers.dev/mcp",
-  "description": "Tavily网络搜索服务"
+  "url": "https://your-worker.workers.dev/mcp",
+  "description": "Tavily 网络搜索服务"
 }
 ```
 
-## ✅ 验证部署
+### Claude Desktop 配置
 
-1. **健康检查**
-   - 访问：`https://你的worker域名.workers.dev/health`
-   - 应该返回健康状态JSON
+在 `claude_desktop_config.json` 中添加：
 
-2. **查看服务页面**
-   - 访问：`https://你的worker域名.workers.dev/`
-   - 应该看到服务信息页面
+```json
+{
+  "mcpServers": {
+    "tavily": {
+      "transport": "http",
+      "url": "https://your-worker.workers.dev/mcp"
+    }
+  }
+}
+```
 
-3. **测试搜索功能**
-   - 在LobeChat中询问需要搜索的问题
-   - 观察是否能正常调用Tavily搜索
+## 🧪 测试验证
 
-## 📊 费用说明
+### 健康检查
+```bash
+curl https://your-worker.workers.dev/health
+```
 
-Cloudflare Workers免费计划包括：
-- ✅ 每天 100,000 次请求
-- ✅ 每次请求 10ms CPU时间
-- ✅ 全球CDN分发
-- ✅ 零运维成本
+### 功能测试
+```bash
+# 测试搜索功能
+curl -X POST https://your-worker.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "tavily_search",
+      "arguments": {
+        "query": "人工智能最新发展"
+      }
+    }
+  }'
+```
 
-对于个人使用绝对足够，完全免费！
+## ⚙️ 高级配置
 
-## 🛠️ 自定义配置
+### 自定义搜索参数
 
-### 修改搜索参数默认值
-在Worker代码中找到 `handleTavilySearch` 函数，可以修改：
-- `max_results`: 默认搜索结果数量
-- `search_depth`: 搜索深度（basic/advanced）
-- `include_answer`: 是否包含AI总结
-
-### 添加访问控制
-如果需要限制访问，可以在代码中添加API密钥验证：
+修改 `worker.js` 中的默认参数：
 
 ```javascript
-// 在handleMCP函数开头添加
+const DEFAULT_CONFIG = {
+  max_results: 10,        // 增加默认结果数量
+  search_depth: 'advanced', // 使用高级搜索
+  include_answer: true    // 包含 AI 摘要
+};
+```
+
+### 访问控制
+
+添加 API 密钥验证：
+
+```javascript
 const authHeader = request.headers.get('Authorization');
 if (authHeader !== 'Bearer your-secret-key') {
     return new Response('Unauthorized', { status: 401 });
 }
 ```
 
-## 🔍 故障排除
+### 日志监控
+
+在 Cloudflare Dashboard 中查看实时日志：
+- 进入 Worker 详情页
+- 选择 `Logs` 选项卡
+- 监控请求和错误信息
+
+## � 成本说明
+
+### Cloudflare Workers 免费额度
+
+- ✅ 每日 100,000 次请求
+- ✅ 每次请求 10ms CPU 时间
+- ✅ 全球 CDN 分发
+- ✅ 零运维成本
+
+### Tavily API 定价
+
+请参考 [Tavily 官方定价](https://tavily.com/pricing) 了解 API 使用费用。
+通常来说：Tavily 免费计划账号每个月有 1000 次 API 调用额度，相同账号下的多个 API Key 共享 1000 次调用额度。
+
+## 🐛 故障排除
 
 ### 常见问题
 
-1. **"TAVILY_API_KEY 环境变量未设置"**
-   - 确保在Cloudflare Dashboard中正确设置了环境变量
-   - 变量名必须完全匹配：`TAVILY_API_KEY`
+**问题：环境变量未设置**
+```
+错误：TAVILY_API_KEY 环境变量未设置
+解决：检查 Cloudflare Dashboard 中的环境变量配置
+```
 
-2. **搜索返回错误**
-   - 检查Tavily API密钥是否有效
-   - 确保API密钥有足够的配额
+**问题：搜索返回错误**
+```
+错误：API 请求失败
+解决：验证 API 密钥有效性和配额余额
+```
 
-3. **LobeChat无法连接**
-   - 确认Worker URL正确
-   - 检查URL路径是否为 `/mcp`
-   - 验证传输协议设置为 `streamable-http`
+**问题：客户端连接失败**
+```
+错误：无法连接到 MCP 服务器
+解决：确认 URL 正确性和协议设置
+```
 
-### 查看日志
-在Cloudflare Dashboard中：
-- 进入Worker详情页
-- 点击 "Logs" 选项卡
-- 查看实时日志输出
+### 调试技巧
 
-## 🎯 优势总结
+1. **查看实时日志**
+   ```bash
+   wrangler tail your-worker-name
+   ```
 
-相比传统部署方式，这个Cloudflare Workers版本具有：
+2. **本地测试**
+   ```bash
+   wrangler dev
+   ```
 
-- ⚡ **零延迟部署**：复制粘贴即可上线
-- 🌍 **全球加速**：Cloudflare边缘网络自动优化
-- 💰 **完全免费**：个人使用零成本
-- 🔒 **安全可靠**：企业级安全防护
-- 📈 **自动扩容**：无需担心流量峰值
-- 🛠️ **零运维**：无需管理服务器
+3. **验证环境变量**
+   ```bash
+   wrangler secret list
+   ```
 
-现在你可以享受强大的网络搜索能力，而无需任何服务器维护工作！
+## 🤝 贡献指南
+
+我们欢迎社区贡献！请遵循以下步骤：
+
+1. Fork 本仓库
+2. 创建功能分支：`git checkout -b feature/AmazingFeature`
+3. 提交更改：`git commit -m 'Add some AmazingFeature'`
+4. 推送分支：`git push origin feature/AmazingFeature`
+5. 提交 Pull Request
+
+### 开发规范
+
+- 遵循 JavaScript/ES6+ 编码规范
+- 添加适当的错误处理和日志记录
+- 更新相关文档和测试用例
+
+## 📄 许可证
+
+本项目基于 MIT 许可证开源。详见 [LICENSE](LICENSE) 文件。
+
+## 🔗 相关链接
+
+- [Model Context Protocol](https://github.com/modelcontextprotocol) - MCP 协议规范
+- [Tavily API](https://tavily.com) - 搜索 API 服务
+- [Cloudflare Workers](https://workers.cloudflare.com/) - 边缘计算平台
+- [LobeChat](https://github.com/lobehub/lobe-chat) - AI 聊天客户端
+
+---
+
+<div align="center">
+
+**[⭐ 给个 Star](https://github.com/your-username/tavily-mcp-server) | [� 报告问题](https://github.com/your-username/tavily-mcp-server/issues) | [� 功能建议](https://github.com/your-username/tavily-mcp-server/discussions)**
+
+</div>
