@@ -1,5 +1,5 @@
 // Tavily MCP Server - Cloudflare Workers版本
-// 支持 Streamable HTTP 协议
+// 支持 Streamable HTTP 协议 (JSON-RPC over HTTP)
 
 // MCP服务器信息
 const SERVER_INFO = {
@@ -67,7 +67,7 @@ const TOOLS = [
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
   'Access-Control-Max-Age': '86400'
 };
 
@@ -143,7 +143,7 @@ function handleRoot() {
                 <li><strong>名称:</strong> ${SERVER_INFO.name}</li>
                 <li><strong>版本:</strong> ${SERVER_INFO.version}</li>
                 <li><strong>描述:</strong> ${SERVER_INFO.description}</li>
-                <li><strong>协议:</strong> Streamable HTTP</li>
+                <li><strong>协议:</strong> Streamable HTTP (JSON-RPC)</li>
             </ul>
 
             <h2>可用端点</h2>
@@ -252,18 +252,16 @@ async function handleMCP(request, env) {
         return createErrorResponse(id, -32601, `未知方法: ${method}`);
     }
 
-    // 创建SSE响应
+    // 创建标准 JSON 响应
     const response = {
       jsonrpc: '2.0',
       id: id,
       result: result
     };
 
-    return new Response(`data: ${JSON.stringify(response)}\n\n`, {
+    return new Response(JSON.stringify(response), {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
+        'Content-Type': 'application/json',
         ...corsHeaders
       }
     });
@@ -284,11 +282,9 @@ function createErrorResponse(id, code, message) {
     }
   };
 
-  return new Response(`data: ${JSON.stringify(errorResponse)}\n\n`, {
+  return new Response(JSON.stringify(errorResponse), {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
+      'Content-Type': 'application/json',
       ...corsHeaders
     }
   });
