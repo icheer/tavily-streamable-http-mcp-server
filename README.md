@@ -191,7 +191,7 @@ const DEFAULT_CONFIG = {
 
 ### 访问控制
 
-添加 API 密钥验证：
+默认未设访问控制，可自行添加 API 密钥验证：
 
 ```javascript
 const authHeader = request.headers.get('Authorization');
