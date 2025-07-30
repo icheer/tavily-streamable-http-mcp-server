@@ -207,7 +207,7 @@ if (authHeader !== 'Bearer your-secret-key') {
 - 选择 `Logs` 选项卡
 - 监控请求和错误信息
 
-## � 成本说明
+## 💰 成本说明
 
 ### Cloudflare Workers 免费额度
 
