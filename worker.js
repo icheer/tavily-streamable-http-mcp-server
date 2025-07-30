@@ -19,7 +19,8 @@ const TOOLS = [
       properties: {
         timezone: {
           type: 'string',
-          description: '时区（默认为UTC），例如：Asia/Shanghai, America/New_York',
+          description:
+            '时区（默认为UTC），例如：Asia/Shanghai, America/New_York',
           default: 'UTC'
         },
         format: {
@@ -88,7 +89,8 @@ const TOOLS = [
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-Requested-With',
   'Access-Control-Max-Age': '86400'
 };
 
@@ -198,7 +200,7 @@ function handleRoot() {
 
   return new Response(html, {
     headers: {
-      'Content-Type': 'text/html',
+      'Content-Type': 'text/html; charset=UTF-8',
       ...corsHeaders
     }
   });
@@ -332,13 +334,13 @@ async function handleGetCurrentTime(args) {
   try {
     const timezone = args.timezone || 'UTC';
     const format = args.format || 'iso';
-    
+
     // 创建当前时间对象
     const now = new Date();
-    
+
     let formattedTime;
     let timezoneName = timezone;
-    
+
     try {
       // 尝试使用指定时区格式化时间
       switch (format) {
@@ -387,20 +389,21 @@ async function handleGetCurrentTime(args) {
       timezoneName = 'UTC';
       formattedTime = now.toISOString();
     }
-    
+
     const unixTimestamp = Math.floor(now.getTime() / 1000);
-    
+
     return {
       content: [
         {
           type: 'text',
-          text: `🕐 **当前时间信息**\n\n` +
-                `⏰ **格式化时间**: ${formattedTime}\n` +
-                `🌍 **时区**: ${timezoneName}\n` +
-                `📅 **Unix时间戳**: ${unixTimestamp}\n` +
-                `🔢 **毫秒时间戳**: ${now.getTime()}\n` +
-                `📊 **格式**: ${format}\n\n` +
-                `⚡ 由 Cloudflare Workers 提供服务`
+          text:
+            `🕐 **当前时间信息**\n\n` +
+            `⏰ **格式化时间**: ${formattedTime}\n` +
+            `🌍 **时区**: ${timezoneName}\n` +
+            `📅 **Unix时间戳**: ${unixTimestamp}\n` +
+            `🔢 **毫秒时间戳**: ${now.getTime()}\n` +
+            `📊 **格式**: ${format}\n\n` +
+            `⚡ 由 Cloudflare Workers 提供服务`
         }
       ]
     };
