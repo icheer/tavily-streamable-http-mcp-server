@@ -291,6 +291,6 @@ if (authHeader !== 'Bearer your-secret-key') {
 
 <div align="center">
 
-**[⭐ 给个 Star](https://github.com/icheer/tavily-streamable-http-mcp-server) | [🐞 报告问题](https://github.com/icheer/tavily-streamable-http-mcp-server/issues) | [💡 功能建议](https://github.com/icheer/tavily-streamable-http-mcp-server/discussions)**
+**[⭐ 给个 Star](https://github.com/icheer/tavily-streamable-http-mcp-server) | [🐞 报告问题](https://github.com/icheer/tavily-streamable-http-mcp-server/issues) | [💡 功能建议](https://github.com/icheer/tavily-streamable-http-mcp-server/issues)**
 
 </div>
