@@ -397,13 +397,12 @@ async function handleGetCurrentTime(args) {
         {
           type: 'text',
           text:
-            `🕐 **当前时间信息**\n\n` +
-            `⏰ **格式化时间**: ${formattedTime}\n` +
-            `🌍 **时区**: ${timezoneName}\n` +
-            `📅 **Unix时间戳**: ${unixTimestamp}\n` +
-            `🔢 **毫秒时间戳**: ${now.getTime()}\n` +
-            `📊 **格式**: ${format}\n\n` +
-            `⚡ 由 Cloudflare Workers 提供服务`
+            `🕐 **Current time**\n\n` +
+            `⏰ **Formatted time**: ${formattedTime}\n` +
+            `🌍 **Timezone**: ${timezoneName}\n` +
+            `📅 **Unix timestamp**: ${unixTimestamp}\n` +
+            `🔢 **Milliseconds timestamp**: ${now.getTime()}\n` +
+            `📊 **Format**: ${format}`
         }
       ]
     };
@@ -495,8 +494,7 @@ async function handleTavilySearch(args, env) {
                   `📝 摘要: ${result.content}\n`
               )
               .join('\n') +
-            (data.answer ? `\n🤖 **AI总结答案:**\n${data.answer}` : '') +
-            `\n\n⚡ 由 Cloudflare Workers 提供服务`
+            (data.answer ? `\n🤖 **AI总结答案:**\n${data.answer}` : '')
         }
       ]
     };
@@ -558,8 +556,7 @@ async function handleTavilyExtract(args, env) {
                     result.raw_content.length > 2000 ? '...(内容已截断)' : ''
                   }\n\n`
               )
-              .join('') +
-            `⚡ 由 Cloudflare Workers 提供服务`
+              .join('')
         }
       ]
     };
