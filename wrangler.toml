@@ -1,0 +1,19 @@
+name = "tavily-mcp-server"
+main = "src/worker.js"
+compatibility_date = "2023-12-01"
+
+# Worker配置
+[env.production]
+name = "tavily-mcp-server"
+
+# 环境变量 (在Cloudflare Dashboard中设置)
+[env.production.vars]
+# TAVILY_API_KEY = "your_api_key_here"  # 不要在这里写真实的API密钥!
+
+# 开发环境配置
+[env.development]
+name = "tavily-mcp-server-dev"
+
+# 限制和配置
+[limits]
+cpu_ms = 50000  # 50秒CPU时间限制
