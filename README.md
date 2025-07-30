@@ -16,8 +16,9 @@ Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规�
 
 ### ✨ 核心特性
 
-- 🔍 **智能搜索**：基于 Tavily API 的高质量网络搜索
+- 🔎 **智能搜索**：基于 Tavily API 的高质量网络搜索
 - 📄 **内容提取**：从指定 URL 提取和处理网页内容
+- 🕜 **时间查询**：获取当前日期时间，支持多时区和多种格式
 - ⚡ **边缘计算**：利用 Cloudflare 全球网络实现低延迟响应
 - 🔐 **安全可靠**：支持 API 密钥轮换和负载均衡
 - 💰 **完全免费**：基于 Cloudflare Workers 免费计划
@@ -96,7 +97,30 @@ Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规�
 
 ### 支持的工具
 
-#### 1. tavily_search
+#### 1. get_current_time
+获取当前日期和时间信息
+
+**参数：**
+```json
+{
+  "timezone": "Asia/Shanghai",    // 可选，时区，默认 UTC
+  "format": "chinese"             // 可选，格式：iso/chinese/us/timestamp，默认 iso
+}
+```
+
+**支持的时区示例：**
+- `UTC` - 协调世界时
+- `Asia/Shanghai` - 北京时间
+- `America/New_York` - 纽约时间
+- `Europe/London` - 伦敦时间
+
+**支持的格式：**
+- `iso` - ISO 8601 格式（默认）
+- `chinese` - 中文格式
+- `us` - 美式英文格式
+- `timestamp` - Unix 时间戳
+
+#### 2. tavily_search
 执行网络搜索操作
 
 **参数：**
@@ -110,7 +134,7 @@ Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规�
 }
 ```
 
-#### 2. tavily_extract
+#### 3. tavily_extract
 从指定 URL 提取内容
 
 **参数：**
@@ -131,7 +155,7 @@ Tavily Streamable HTTP MCP Server 是一个实现了 Model Context Protocol 规�
   "name": "tavily-search",
   "transport": "streamable-http",
   "url": "https://your-worker.workers.dev/mcp",
-  "description": "Tavily 网络搜索服务"
+  "description": "Tavily 网络搜索服务 & 查询真实世界的当前时间"
 }
 ```
 
@@ -159,6 +183,22 @@ curl https://your-worker.workers.dev/health
 
 ### 功能测试
 ```bash
+# 测试时间查询功能
+curl -X POST https://your-worker.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "get_current_time",
+      "arguments": {
+        "timezone": "Asia/Shanghai",
+        "format": "chinese"
+      }
+    }
+  }'
+
 # 测试搜索功能
 curl -X POST https://your-worker.workers.dev/mcp \
   -H "Content-Type: application/json" \

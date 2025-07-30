@@ -12,6 +12,27 @@ const SERVER_INFO = {
 // 支持的工具列表
 const TOOLS = [
   {
+    name: 'get_current_time',
+    description: '获取当前日期和时间',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        timezone: {
+          type: 'string',
+          description: '时区（默认为UTC），例如：Asia/Shanghai, America/New_York',
+          default: 'UTC'
+        },
+        format: {
+          type: 'string',
+          enum: ['iso', 'chinese', 'us', 'timestamp'],
+          description: '时间格式（默认iso）',
+          default: 'iso'
+        }
+      },
+      required: []
+    }
+  },
+  {
     name: 'tavily_search',
     description: '使用Tavily API进行网络搜索',
     inputSchema: {
@@ -295,12 +316,104 @@ async function handleToolCall(params, env) {
   const { name, arguments: args } = params;
 
   switch (name) {
+    case 'get_current_time':
+      return await handleGetCurrentTime(args);
     case 'tavily_search':
       return await handleTavilySearch(args, env);
     case 'tavily_extract':
       return await handleTavilyExtract(args, env);
     default:
       throw new Error(`未知工具: ${name}`);
+  }
+}
+
+// 处理获取当前时间
+async function handleGetCurrentTime(args) {
+  try {
+    const timezone = args.timezone || 'UTC';
+    const format = args.format || 'iso';
+    
+    // 创建当前时间对象
+    const now = new Date();
+    
+    let formattedTime;
+    let timezoneName = timezone;
+    
+    try {
+      // 尝试使用指定时区格式化时间
+      switch (format) {
+        case 'chinese':
+          formattedTime = now.toLocaleString('zh-CN', {
+            timeZone: timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            weekday: 'long'
+          });
+          break;
+        case 'us':
+          formattedTime = now.toLocaleString('en-US', {
+            timeZone: timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            weekday: 'long'
+          });
+          break;
+        case 'timestamp':
+          formattedTime = Math.floor(now.getTime() / 1000).toString();
+          break;
+        case 'iso':
+        default:
+          if (timezone === 'UTC') {
+            formattedTime = now.toISOString();
+          } else {
+            // 对于非UTC时区，使用toLocaleString然后转换格式
+            const localeTime = now.toLocaleString('sv-SE', {
+              timeZone: timezone
+            });
+            formattedTime = localeTime.replace(' ', 'T') + 'Z';
+          }
+          break;
+      }
+    } catch (error) {
+      // 如果时区无效，回退到UTC
+      timezoneName = 'UTC';
+      formattedTime = now.toISOString();
+    }
+    
+    const unixTimestamp = Math.floor(now.getTime() / 1000);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🕐 **当前时间信息**\n\n` +
+                `⏰ **格式化时间**: ${formattedTime}\n` +
+                `🌍 **时区**: ${timezoneName}\n` +
+                `📅 **Unix时间戳**: ${unixTimestamp}\n` +
+                `🔢 **毫秒时间戳**: ${now.getTime()}\n` +
+                `📊 **格式**: ${format}\n\n` +
+                `⚡ 由 Cloudflare Workers 提供服务`
+        }
+      ]
+    };
+  } catch (error) {
+    console.error('获取时间错误:', error);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `❌ 获取时间失败: ${error.message}`
+        }
+      ]
+    };
   }
 }
 
