@@ -392,19 +392,34 @@ async function handleGetCurrentTime(args) {
 
     const unixTimestamp = Math.floor(now.getTime() / 1000);
 
+    // 返回结构化数据和用户友好的文本
+    const structuredData = {
+      formatted_time: formattedTime,
+      timezone: timezoneName,
+      unix_timestamp: unixTimestamp,
+      milliseconds_timestamp: now.getTime(),
+      format: format,
+      iso_string: now.toISOString()
+    };
+
+    const displayText = 
+      `Current time\n\n` +
+      `Formatted time: ${formattedTime}\n` +
+      `Timezone: ${timezoneName}\n` +
+      `Unix timestamp: ${unixTimestamp}\n` +
+      `Milliseconds timestamp: ${now.getTime()}\n` +
+      `Format: ${format}`;
+
     return {
       content: [
         {
           type: 'text',
-          text:
-            `🕐 **Current time**\n\n` +
-            `⏰ **Formatted time**: ${formattedTime}\n` +
-            `🌍 **Timezone**: ${timezoneName}\n` +
-            `📅 **Unix timestamp**: ${unixTimestamp}\n` +
-            `🔢 **Milliseconds timestamp**: ${now.getTime()}\n` +
-            `📊 **Format**: ${format}`
+          text: displayText
         }
-      ]
+      ],
+      _meta: {
+        structured_data: structuredData
+      }
     };
   } catch (error) {
     console.error('获取时间错误:', error);
@@ -412,7 +427,7 @@ async function handleGetCurrentTime(args) {
       content: [
         {
           type: 'text',
-          text: `❌ 获取时间失败: ${error.message}`
+          text: `获取时间失败: ${error.message}`
         }
       ]
     };
@@ -478,25 +493,42 @@ async function handleTavilySearch(args, env) {
       published_date: result.published_date || null
     }));
 
+    // 构建结构化数据
+    const structuredData = {
+      query: args.query,
+      total_results: results.length,
+      search_depth: args.search_depth || 'basic',
+      max_results: args.max_results || 5,
+      results: results,
+      answer: data.answer || null,
+      include_domains: args.include_domains || null,
+      exclude_domains: args.exclude_domains || null
+    };
+
+    // 构建用户友好的显示文本
+    const displayText = 
+      `搜索查询: "${args.query}"\n找到 ${results.length} 个结果:\n\n` +
+      results
+        .map((result, index) =>
+          `${index + 1}. ${result.title}\n` +
+          `URL: ${result.url}\n` +
+          `评分: ${result.score.toFixed(2)}\n` +
+          `发布日期: ${result.published_date || '未知'}\n` +
+          `摘要: ${result.content}\n`
+        )
+        .join('\n') +
+      (data.answer ? `\nAI总结答案:\n${data.answer}` : '');
+
     return {
       content: [
         {
           type: 'text',
-          text:
-            `🔍 搜索查询: "${args.query}"\n📊 找到 ${results.length} 个结果:\n\n` +
-            results
-              .map(
-                (result, index) =>
-                  `**${index + 1}. ${result.title}**\n` +
-                  `🔗 URL: ${result.url}\n` +
-                  `⭐ 评分: ${result.score.toFixed(2)}\n` +
-                  `📅 发布日期: ${result.published_date || '未知'}\n` +
-                  `📝 摘要: ${result.content}\n`
-              )
-              .join('\n') +
-            (data.answer ? `\n🤖 **AI总结答案:**\n${data.answer}` : '')
+          text: displayText
         }
-      ]
+      ],
+      _meta: {
+        structured_data: structuredData
+      }
     };
   } catch (error) {
     console.error('Tavily搜索错误:', error);
@@ -504,7 +536,7 @@ async function handleTavilySearch(args, env) {
       content: [
         {
           type: 'text',
-          text: `❌ 搜索失败: ${error.message}`
+          text: `搜索失败: ${error.message}`
         }
       ]
     };
@@ -541,24 +573,41 @@ async function handleTavilyExtract(args, env) {
       status_code: result.status_code || 0
     }));
 
+    // 构建结构化数据
+    const structuredData = {
+      urls: args.urls,
+      total_results: results.length,
+      results: results.map(result => ({
+        ...result,
+        content_length: result.raw_content.length,
+        content_preview: result.raw_content.substring(0, 200)
+      }))
+    };
+
+    // 构建用户友好的显示文本
+    const displayText = 
+      `内容提取结果:\n\n` +
+      results
+        .map((result, index) =>
+          `${index + 1}. URL: ${result.url}\n` +
+          `状态码: ${result.status_code}\n` +
+          `内容长度: ${result.raw_content.length} 字符\n` +
+          `内容:\n${result.raw_content.substring(0, 2000)}${
+            result.raw_content.length > 2000 ? '...(内容已截断)' : ''
+          }\n\n`
+        )
+        .join('');
+
     return {
       content: [
         {
           type: 'text',
-          text:
-            `📄 内容提取结果:\n\n` +
-            results
-              .map(
-                (result, index) =>
-                  `**${index + 1}. URL**: ${result.url}\n` +
-                  `**状态码**: ${result.status_code}\n` +
-                  `**内容**:\n${result.raw_content.substring(0, 2000)}${
-                    result.raw_content.length > 2000 ? '...(内容已截断)' : ''
-                  }\n\n`
-              )
-              .join('')
+          text: displayText
         }
-      ]
+      ],
+      _meta: {
+        structured_data: structuredData
+      }
     };
   } catch (error) {
     console.error('Tavily提取错误:', error);
@@ -566,7 +615,7 @@ async function handleTavilyExtract(args, env) {
       content: [
         {
           type: 'text',
-          text: `❌ 内容提取失败: ${error.message}`
+          text: `内容提取失败: ${error.message}`
         }
       ]
     };
